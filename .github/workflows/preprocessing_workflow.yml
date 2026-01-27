@@ -1,0 +1,37 @@
+name: Data Preprocessing Workflow
+
+on:
+  push:
+    paths:
+      - 'loan_dataset_raw/**'
+      - 'preprocessing/automate_Annisa.py'
+  workflow_dispatch: # Allow manual trigger
+jobs:
+  preprocess-data:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install Dependencies
+      run: |
+        pip install -r preprocessing/requirements.txt
+
+    - name: Run Preprocessing Script
+      run: |
+        python preprocessing/automate_Annisa.py
+
+    - name: Commit and Push Processed Data
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add preprocessing/loan_dataset_preprocessing/loan_clean.csv
+        # Commit hanya jika ada perubahan
+        git commit -m "Auto-update: Processed dataset via GitHub Actions" || echo "No changes to commit"
+        git push
