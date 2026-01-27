@@ -5,7 +5,8 @@ on:
     paths:
       - 'loan_dataset_raw/**'
       - 'preprocessing/automate_Annisa.py'
-  workflow_dispatch: # Allow manual trigger
+  workflow_dispatch:
+
 jobs:
   preprocess-data:
     runs-on: ubuntu-latest
@@ -21,7 +22,11 @@ jobs:
 
     - name: Install Dependencies
       run: |
-        pip install -r preprocessing/requirements.txt
+        pip install pandas numpy scikit-learn
+
+    - name: Debug File Structure
+      run: |
+        ls -R
 
     - name: Run Preprocessing Script
       run: |
@@ -31,8 +36,8 @@ jobs:
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        # Memastikan folder output ada sebelum add
+        mkdir -p preprocessing/loan_dataset_preprocessing
         git add preprocessing/loan_dataset_preprocessing/loan_clean.csv
-        # Commit hanya jika ada perubahan
         git commit -m "Auto-update: Processed dataset via GitHub Actions" || echo "No changes to commit"
         git push
-        
