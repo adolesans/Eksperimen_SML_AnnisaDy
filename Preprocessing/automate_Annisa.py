@@ -67,13 +67,11 @@ def preprocess_data(input_path, output_path):
     print(f"Data tersimpan di: {output_path}")
 
 if __name__ == "__main__":
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    project_root = os.path.dirname(base_dir)
+    # Path Input: Folder raw di root
+    input_file = 'loan_dataset_raw/loan_dataset.csv'
     
-    # Path Input
-    input_file = os.path.join(project_root, 'loan_dataset_raw', 'loan_dataset.csv')
+    # Path Output: Folder preprocessing di root
+    output_file = 'preprocessing/loan_clean.csv'
     
-    # Path Output
-    output_file = os.path.join(base_dir, 'loan_dataset_preprocessing', 'loan_clean.csv')
-    
+    # Eksekusi
     preprocess_data(input_file, output_file)
