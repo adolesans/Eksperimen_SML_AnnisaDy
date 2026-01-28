@@ -28,7 +28,7 @@ jobs:
 
     - name: Run Preprocessing Script
       run: |
-        python preprocessing/automate_Annisa.py
+        python Preprocessing/automate_Annisa.py
 
     - name: Commit and Push Processed Data
       run: |
@@ -36,10 +36,10 @@ jobs:
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         
         # Debug: Cek apakah file benar-benar ada di situ
-        ls -l preprocessing/
+        ls -l Preprocessing/
         
         # Add file yang BENAR
-        git add preprocessing/loan_clean.csv
+        git add Preprocessing/loan_clean.csv
         
         git commit -m "Auto-update: Processed dataset [Skip CI]" || echo "No changes to commit"
         git push
