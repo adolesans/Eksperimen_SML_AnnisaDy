@@ -60,6 +60,6 @@ if __name__ == "__main__":
     input_csv = find_dataset('loan_dataset.csv')
     
     # OUTPUT YANG BENAR (Langsung di dalam folder preprocessing)
-    output_csv = 'preprocessing/loan_clean.csv'
+    output_csv = 'Preprocessing/loan_clean.csv'
     
     preprocess_data(input_csv, output_csv)
