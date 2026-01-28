@@ -3,9 +3,11 @@ name: Data Preprocessing Workflow
 on:
   push:
     paths:
-      - 'loan_dataset_raw/**'
-      - 'preprocessing/automate_Annisa.py'
+      - '**'
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   preprocess-data:
@@ -24,10 +26,6 @@ jobs:
       run: |
         pip install pandas numpy scikit-learn
 
-    - name: Debug File Structure
-      run: |
-        ls -R
-
     - name: Run Preprocessing Script
       run: |
         python preprocessing/automate_Annisa.py
@@ -36,8 +34,12 @@ jobs:
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        # Memastikan folder output ada sebelum add
-        mkdir -p preprocessing/loan_dataset_preprocessing
-        git add preprocessing/loan_dataset_preprocessing/loan_clean.csv
-        git commit -m "Auto-update: Processed dataset via GitHub Actions" || echo "No changes to commit"
+        
+        # Debug: Cek apakah file benar-benar ada di situ
+        ls -l preprocessing/
+        
+        # Add file yang BENAR
+        git add preprocessing/loan_clean.csv
+        
+        git commit -m "Auto-update: Processed dataset [Skip CI]" || echo "No changes to commit"
         git push

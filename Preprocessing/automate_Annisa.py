@@ -1,10 +1,22 @@
 import pandas as pd
 import numpy as np
 import os
+import sys
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
 
-# Remove outlier (IQR)
+# --- Fungsi Pencari File Otomatis ---
+def find_dataset(filename):
+    print(f"Mencari file '{filename}'...")
+    for root, dirs, files in os.walk('.'):
+        if filename in files:
+            full_path = os.path.join(root, filename)
+            print(f"DITEMUKAN: {full_path}")
+            return full_path
+    
+    print("File dataset tidak ditemukan!")
+    sys.exit(1)
+
+# --- Fungsi Outliers ---
 def remove_outliers_iqr(df, columns):
     for col in columns:
         Q1 = df[col].quantile(0.25)
@@ -15,63 +27,39 @@ def remove_outliers_iqr(df, columns):
         df = df[(df[col] >= lower) & (df[col] <= upper)]
     return df
 
-# Preprocessing
+# --- Fungsi Utama Preprocessing ---
 def preprocess_data(input_path, output_path):
-    # 1. Load Data
-    if not os.path.exists(input_path):
-        raise FileNotFoundError(f"File tidak ditemukan di: {input_path}")
-    
+    print(f"Memproses data...")
     df = pd.read_csv(input_path)
-    print(f"Data awal dimuat: {df.shape}")
 
-    # 2. Handling Missing Values
+    # 1. Handling Missing Values
     cat_cols = ['Gender', 'Married', 'Dependents', 'Self_Employed', 'Credit_History', 'Loan_Amount_Term']
     for col in cat_cols:
-        if col in df.columns:
-            df[col] = df[col].fillna(df[col].mode()[0])
-            
-    # Handling numeric missing values
-    if 'LoanAmount' in df.columns:
-        df['LoanAmount'] = df['LoanAmount'].fillna(df['LoanAmount'].mean())
+        if col in df.columns: df[col] = df[col].fillna(df[col].mode()[0])
+    
+    if 'LoanAmount' in df.columns: df['LoanAmount'] = df['LoanAmount'].fillna(df['LoanAmount'].mean())
 
-    # 3. Encoding (One-Hot Encoding)
-    df = pd.get_dummies(df, drop_first=True)
-
-    # 4. Outlier Removal
+    # 2. Outlier Removal
     numeric_targets = ['ApplicantIncome', 'CoapplicantIncome', 'LoanAmount']
     existing_numeric = [c for c in numeric_targets if c in df.columns]
-    df_clean = remove_outliers_iqr(df, existing_numeric)
+    df = remove_outliers_iqr(df, existing_numeric)
 
-    # 5. Scaling
-    target_col = 'Loan_Status_Y' 
-    targets = [col for col in df_clean.columns if 'Loan_Status' in col]
-    
-    if targets:
-        target_col = targets[0]
-        X = df_clean.drop(columns=[target_col])
-        y = df_clean[target_col]
-        
-        scaler = StandardScaler()
-        X_scaled = scaler.fit_transform(X)
-        
-        processed_df = pd.DataFrame(X_scaled, columns=X.columns)
-        processed_df[target_col] = y.values
-    else:
-        # Fallback jika target tidak ada/berbeda
-        scaler = StandardScaler()
-        processed_df = pd.DataFrame(scaler.fit_transform(df_clean), columns=df_clean.columns)
+    # 3. Encoding & Scaling
+    df = pd.get_dummies(df, drop_first=True)
+    scaler = StandardScaler()
+    processed_df = pd.DataFrame(scaler.fit_transform(df), columns=df.columns)
 
-    # 6. Simpan Hasil
+    # 4. Simpan Hasil
+    # Pastikan folder induknya (preprocessing/) ada
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     processed_df.to_csv(output_path, index=False)
-    print(f"Data tersimpan di: {output_path}")
+    print(f"SUKSES! Tersimpan di: {output_path}")
 
 if __name__ == "__main__":
-    # Path Input: Folder raw di root
-    input_file = 'loan_dataset_raw/loan_dataset.csv'
+    # Cari input otomatis
+    input_csv = find_dataset('loan_dataset.csv')
     
-    # Path Output: Folder preprocessing di root
-    output_file = 'preprocessing/loan_clean.csv'
+    # OUTPUT YANG BENAR (Langsung di dalam folder preprocessing)
+    output_csv = 'preprocessing/loan_clean.csv'
     
-    # Eksekusi
-    preprocess_data(input_file, output_file)
+    preprocess_data(input_csv, output_csv)
